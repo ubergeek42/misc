@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Latency</title>
+  <style>
+    body {
+      margin: 0 auto;
+      max-width: 95%;
+      font-family: "Helvetica", "Arial", sans-serif;
+      color: #555;
+    }
+
+    button {
+      outline: none;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      background-color: red;
+      position: relative;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .old button {
+      background-color: red;
+    }
+
+    .new button {
+      background-color: green;
+    }
+
+    #row {
+      display: flex;
+      flex-flow: row;
+      justify-content: center;
+    }
+
+    #container-old,
+    #container-new {
+      width: 800px;
+      height: 600px;
+      overflow: auto;
+      display: flex;
+      flex-flow: column;
+      border: 1px solid lightgray;
+    }
+
+    .params p {
+      font-size: 22px;
+      text-align: center;
+    }
+
+    .new,
+    .old {
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="row">
+    <div class="old" id="red">
+      <div class="params">
+        <p>Speed: <span id="pix_per_sec-old">_</span> pix/s</p>
+        <p>Clicks: <span id="nb_clicks-old">0</span></p>
+      </div>
+      <div id="container-old">
+        <button id="target-old" onclick="fire(0)">X</button>
+      </div>
+    </div>
+    <div class="new" id="green">
+      <div class="params">
+        <p>Speed: <span id="pix_per_sec-new">_</span> pix/s</p>
+        <p>Clicks: <span id="nb_clicks-new">0</span></p>
+      </div>
+      <div id="container-new">
+        <button id="target-new" onclick="fire(1)">X</button>
+      </div>
+    </div>
+  </div>
+</body>
+<script type="text/javascript">
+  const origin = [400, 300];
+  const pi_180 = Math.PI / 180;
+  const pi2 = Math.PI * 2;
+  const radius = 250;
+  const circumference = radius * pi2;
+  const OLD = 0;
+  const NEW = 1;
+  var angle_rad = [0, 0];
+  var deg_per_sec = [0, 0];
+  var rads_per_sec = [0, 0];
+  var nb_clicks = [0, 0];
+  const names = ['old', 'new'];
+
+  var pix_per_sec = [
+    parseFloat(new URL(window.location.href).searchParams.get("red")),
+    parseFloat(new URL(window.location.href).searchParams.get("green"))
+  ];
+
+  if (isNaN(pix_per_sec[OLD]) && isNaN(pix_per_sec[NEW])) {
+    pix_per_sec[OLD] = 0.2;
+  }
+
+  if (isNaN(pix_per_sec[OLD])) {
+    document.getElementById("red").style.display = "none";
+  }
+  if (isNaN(pix_per_sec[NEW])) {
+    document.getElementById("green").style.display = "none";
+  }
+
+
+
+  deg_per_sec[OLD] = pix_per_sec[OLD] * 360.0 / circumference;
+  rads_per_sec[OLD] = deg_per_sec[OLD] * pi_180;
+  document.getElementById("pix_per_sec-old").textContent = pix_per_sec[OLD].toFixed(4);
+
+  deg_per_sec[NEW] = pix_per_sec[NEW] * 360.0 / circumference;
+  rads_per_sec[NEW] = deg_per_sec[NEW] * pi_180;
+  document.getElementById("pix_per_sec-new").textContent = pix_per_sec[NEW].toFixed(4);
+
+  const target = [
+    document.getElementById('target-old'),
+    document.getElementById('target-new')
+  ];
+
+  function increaseSpeed(i) {
+    pix_per_sec[i] += 0.025;
+    deg_per_sec[i] = pix_per_sec[i] * 360.0 / circumference;
+    rads_per_sec[i] = deg_per_sec[i] * pi_180;
+    document.getElementById("pix_per_sec-" + names[i]).textContent = pix_per_sec[i].toFixed(4);
+  }
+
+  function fire(i) {
+    nb_clicks[i]++;
+    console.log("nb_clicks", nb_clicks[i]);
+    document.getElementById("nb_clicks-" + names[i]).textContent = nb_clicks[i];
+
+    if (nb_clicks[i] == 5) {
+      nb_clicks[i] = 0;
+      increaseSpeed(i);
+    }
+  }
+
+  function move(index) {
+    angle_rad[index] = (angle_rad[index] + rads_per_sec[index]) % pi2;
+    target[index].style.left = origin[0] + radius * Math.sin(angle_rad[index]) + "px";
+    target[index].style.top = origin[1] + radius * Math.cos(angle_rad[index]) + "px";
+  }
+  setInterval(function () { move(OLD); move(NEW) }, 10);
+</script>
+
+</html>
