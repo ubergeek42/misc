@@ -68,18 +68,20 @@
       <div class="params">
         <p>Speed: <span id="pix_per_sec-old">_</span> pix/s</p>
         <p>Clicks: <span id="nb_clicks-old">0</span></p>
+        <p>Missed Clicks: <span id="miss_clicks-old">0</span></p>
       </div>
-      <div id="container-old">
-        <button id="target-old" onclick="fire(0)">X</button>
+      <div id="container-old" onclick="miss(event, 0)">
+        <button id="target-old" onclick="fire(event, 0)">X</button>
       </div>
     </div>
     <div class="new" id="green">
       <div class="params">
         <p>Speed: <span id="pix_per_sec-new">_</span> pix/s</p>
         <p>Clicks: <span id="nb_clicks-new">0</span></p>
+        <p>Missed Clicks: <span id="miss_clicks-new">0</span></p>
       </div>
-      <div id="container-new">
-        <button id="target-new" onclick="fire(1)">X</button>
+      <div id="container-new" onclick="miss(event, 1)">
+        <button id="target-new" onclick="fire(event, 1)">X</button>
       </div>
     </div>
   </div>
@@ -96,6 +98,7 @@
   var deg_per_sec = [0, 0];
   var rads_per_sec = [0, 0];
   var nb_clicks = [0, 0];
+  var miss_clicks = [0, 0];
   const names = ['old', 'new'];
 
   var pix_per_sec = [
@@ -136,7 +139,7 @@
     document.getElementById("pix_per_sec-" + names[i]).textContent = pix_per_sec[i].toFixed(4);
   }
 
-  function fire(i) {
+  function fire(e, i) {
     nb_clicks[i]++;
     console.log("nb_clicks", nb_clicks[i]);
     document.getElementById("nb_clicks-" + names[i]).textContent = nb_clicks[i];
@@ -145,6 +148,14 @@
       nb_clicks[i] = 0;
       increaseSpeed(i);
     }
+    e.stopPropagation();
+  }
+
+  function miss(e, i) {
+    miss_clicks[i]++;
+    console.log("miss_clicks", miss_clicks[i]);
+    document.getElementById("miss_clicks-" + names[i]).textContent = miss_clicks[i];
+    e.stopPropagation();
   }
 
   function move(index) {
